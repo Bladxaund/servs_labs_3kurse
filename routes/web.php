@@ -1,21 +1,27 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MainController;
 
-Route::get('/', function () {
-    return view('pages.home');
-})->name('home');
+// Главная — вывод статей из JSON
+Route::get('/', [MainController::class, 'index'])->name('home');
 
+// Страница "О нас"
 Route::get('/about', function () {
-    return view('pages.about');
+    return view('about');
 })->name('about');
 
+// Страница "Контакты"
 Route::get('/contacts', function () {
     $contacts = [
-        ['name' => 'Телефон', 'value' => '+7 (999) 123-45-67'],
-        ['name' => 'Email',   'value' => 'info@example.com'],
-        ['name' => 'Адрес',   'value' => 'г. Москва, ул. Примерная, д. 1'],
+        ['title' => 'Телефон',  'value' => '+7 (900) 123-45-67'],
+        ['title' => 'Email',    'value' => 'info@example.com'],
+        ['title' => 'Адрес',    'value' => 'г. Москва, ул. Пушкина, д. 10'],
+        ['title' => 'Telegram', 'value' => '@my_site_support'],
     ];
 
-    return view('pages.contacts', ['contacts' => $contacts]);
+    return view('contacts', ['contacts' => $contacts]);
 })->name('contacts');
+
+// Галерея — все полные изображения
+Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
