@@ -2,16 +2,22 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\AuthController; // <-- Добавлено для лабы 3
 
-// Главная — вывод статей из JSON
-Route::get('/', [MainController::class, 'index'])->name('home');
+// ==========================================
+// ЛАБОРАТОРНАЯ 2 (Главная, Галерея)
+// ==========================================
+Route::get('/', [MainController::class, 'index'])->name('home'); // <-- Вот он, пропавший маршрут!
+Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
 
-// Страница "О нас"
+
+// ==========================================
+// СТАРЫЕ СТРАНИЦЫ (О нас, Контакты)
+// ==========================================
 Route::get('/about', function () {
     return view('about');
 })->name('about');
 
-// Страница "Контакты"
 Route::get('/contacts', function () {
     $contacts = [
         ['title' => 'Телефон',  'value' => '+7 (900) 123-45-67'],
@@ -19,9 +25,12 @@ Route::get('/contacts', function () {
         ['title' => 'Адрес',    'value' => 'г. Москва, ул. Пушкина, д. 10'],
         ['title' => 'Telegram', 'value' => '@my_site_support'],
     ];
-
     return view('contacts', ['contacts' => $contacts]);
 })->name('contacts');
 
-// Галерея — все полные изображения
-Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
+
+// ==========================================
+// ЛАБОРАТОРНАЯ 3 (Регистрация)
+// ==========================================
+Route::get('/signin', [AuthController::class, 'create'])->name('signin');
+Route::post('/signin', [AuthController::class, 'registration'])->name('registration.post');

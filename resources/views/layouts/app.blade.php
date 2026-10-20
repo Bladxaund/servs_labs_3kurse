@@ -34,11 +34,12 @@
 <body>
     <header>
         <nav>
-            <a href="{{ route('home') }}">Главная</a>
-            <a href="{{ route('about') }}">О нас</a>
-            <a href="{{ route('contacts') }}">Контакты</a>
-            <a href="{{ route('gallery') }}">Галерея</a>
-        </nav>
+    <a href="{{ route('home') }}">Главная</a>
+    <a href="{{ route('about') }}">О нас</a>
+    <a href="{{ route('contacts') }}">Контакты</a>
+    <a href="{{ route('gallery') }}">Галерея</a>
+    <a href="{{ route('signin') }}">Регистрация</a> <!-- Новая ссылка -->
+</nav>
     </header>
 
     <main>
