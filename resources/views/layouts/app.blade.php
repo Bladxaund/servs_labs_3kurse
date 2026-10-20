@@ -7,10 +7,10 @@
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f8; }
         header { background: #2d3748; padding: 15px 30px; }
-        header nav a { color: #fff; margin-right: 20px; text-decoration: none; }
+        header nav a { color: #fff; margin-right: 20px; text-decoration: none; font-size: 16px; }
         header nav a:hover { text-decoration: underline; }
         main { padding: 30px; min-height: 400px; max-width: 1000px; margin: 0 auto; }
-        footer { background: #edf2f7; padding: 15px 30px; text-align: center; color: #4a5568; }
+        footer { background: #edf2f7; padding: 15px 30px; text-align: center; color: #4a5568; margin-top: 40px; }
 
         .page { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
         .page h1 { color: #2d3748; margin-top: 0; }
@@ -29,42 +29,35 @@
 
         .contacts-list { list-style: none; padding: 0; }
         .contacts-list li { padding: 12px 15px; border-left: 4px solid #1abc9c; background: #f9fafb; margin-bottom: 10px; border-radius: 4px; }
+
         /* Стили пагинации */
-.pagination { display: flex; list-style: none; padding: 0; gap: 5px; justify-content: center; }
-.pagination li a, .pagination li span { padding: 8px 12px; background: #fff; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #2d3748; }
-.pagination li.active span { background: #2d3748; color: #fff; border-color: #2d3748; }
-.pagination li a:hover { background: #f4f6f8; }
-/* Стили пагинации */
-.pagination { display: flex; padding-left: 0; list-style: none; border-radius: .25rem; margin-top: 20px; }
-.page-link { position: relative; display: block; padding: .5rem .75rem; margin-left: -1px; line-height: 1.25; color: #2d3748; background-color: #fff; border: 1px solid #dee2e6; text-decoration: none; }
-.page-link:hover { z-index: 2; color: #1a202c; text-decoration: none; background-color: #e9ecef; border-color: #dee2e6; }
-.page-item.active .page-link { z-index: 3; color: #fff; background-color: #2d3748; border-color: #2d3748; }
-.page-item.disabled .page-link { color: #6c757d; pointer-events: none; cursor: auto; background-color: #fff; border-color: #dee2e6; }
+        .pagination { display: flex; padding-left: 0; list-style: none; border-radius: .25rem; margin-top: 20px; gap: 5px; }
+        .page-link { position: relative; display: block; padding: .5rem .75rem; line-height: 1.25; color: #2d3748; background-color: #fff; border: 1px solid #dee2e6; text-decoration: none; border-radius: 4px; }
+        .page-link:hover { z-index: 2; color: #1a202c; background-color: #e9ecef; }
+        .page-item.active .page-link { z-index: 3; color: #fff; background-color: #2d3748; border-color: #2d3748; }
     </style>
 </head>
 <body>
     <header>
         <nav>
-    <a href="{{ route('home') }}">Главная</a>
-    <a href="{{ route('about') }}">О нас</a>
-    <a href="{{ route('contacts') }}">Контакты</a>
-    <a href="{{ route('gallery') }}">Галерея</a>
+            <a href="{{ route('home') }}">Главная</a>
+            <a href="{{ route('about') }}">О нас</a>
+            <a href="{{ route('contacts') }}">Контакты</a>
+            <a href="{{ route('gallery') }}">Галерея</a>
 
-    {{-- Если пользователь вошел в систему --}}
-    @auth
-        <span style="color: #a0aec0; margin-right: 20px; margin-left: 20px;">Привет, {{ auth()->user()->name }}!</span>
-        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
-            @csrf
-            <button type="submit" style="background: none; border: none; color: #fc8181; cursor: pointer; font-size: 16px;">Выйти</button>
-        </form>
-    @endauth
+            @auth
+                <span style="color: #a0aec0; margin-right: 20px; margin-left: 20px;">Привет, {{ auth()->user()->name }}!</span>
+                <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                    @csrf
+                    <button type="submit" style="background: none; border: none; color: #fc8181; cursor: pointer; font-size: 16px;">Выйти</button>
+                </form>
+            @endauth
 
-    {{-- Если пользователь - гость --}}
-    @guest
-        <a href="{{ route('register') }}">Регистрация</a>
-        <a href="{{ route('login') }}">Вход</a>
-    @endguest
-</nav>
+            @guest
+                <a href="{{ route('register') }}">Регистрация</a>
+                <a href="{{ route('login') }}">Вход</a>
+            @endguest
+        </nav>
     </header>
 
     <main>

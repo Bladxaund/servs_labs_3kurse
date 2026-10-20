@@ -5,7 +5,7 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
 
-// --- ЛАБА 6: Авторизация и Регистрация ---
+// --- АВТОРИЗАЦИЯ (Лаба 6) ---
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
@@ -14,20 +14,16 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
 
-// Выход (только для авторизованных)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-
-// --- СТАТЬИ (CRUD) ---
-// Главная страница (доступна всем)
+// --- CRUD СТАТЬИ (Лабы 5, 7) ---
 Route::get('/', [ArticleController::class, 'index'])->name('home');
-
-// Просмотр одной статьи (доступен всем)
 Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
 
-// Создание, Редактирование, Удаление (ТОЛЬКО ДЛЯ АВТОРИЗОВАННЫХ - п.4 задания)
-Route::resource('articles', ArticleController::class)->except(['index', 'show'])->middleware('auth:sanctum');
-
+// Только для модераторов (через политику)
+Route::resource('articles', ArticleController::class)
+    ->except(['index', 'show'])
+    ->middleware('can:create,App\Models\Article');
 
 // --- ОСТАЛЬНЫЕ СТРАНИЦЫ ---
 Route::get('/about', function () { return view('about'); })->name('about');

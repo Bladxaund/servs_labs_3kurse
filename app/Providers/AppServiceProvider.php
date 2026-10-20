@@ -3,24 +3,25 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator; // <-- Добавьте этот импорт
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Gate;
+use App\Models\User;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // Указываем Laravel использовать простую верстку пагинации (Bootstrap 4)
-        Paginator::useBootstrapFour(); 
+        // Из 5-й лабы (стили пагинации)
+        Paginator::useBootstrapFour();
+
+        // Из 7-й лабы (Шлюз для комментариев)
+        Gate::define('write-comment', function (User $user) {
+            return $user->role && $user->role->name === 'moderator';
+        });
     }
 }
