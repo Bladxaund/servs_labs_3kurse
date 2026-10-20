@@ -29,6 +29,17 @@
 
         .contacts-list { list-style: none; padding: 0; }
         .contacts-list li { padding: 12px 15px; border-left: 4px solid #1abc9c; background: #f9fafb; margin-bottom: 10px; border-radius: 4px; }
+        /* Стили пагинации */
+.pagination { display: flex; list-style: none; padding: 0; gap: 5px; justify-content: center; }
+.pagination li a, .pagination li span { padding: 8px 12px; background: #fff; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #2d3748; }
+.pagination li.active span { background: #2d3748; color: #fff; border-color: #2d3748; }
+.pagination li a:hover { background: #f4f6f8; }
+/* Стили пагинации */
+.pagination { display: flex; padding-left: 0; list-style: none; border-radius: .25rem; margin-top: 20px; }
+.page-link { position: relative; display: block; padding: .5rem .75rem; margin-left: -1px; line-height: 1.25; color: #2d3748; background-color: #fff; border: 1px solid #dee2e6; text-decoration: none; }
+.page-link:hover { z-index: 2; color: #1a202c; text-decoration: none; background-color: #e9ecef; border-color: #dee2e6; }
+.page-item.active .page-link { z-index: 3; color: #fff; background-color: #2d3748; border-color: #2d3748; }
+.page-item.disabled .page-link { color: #6c757d; pointer-events: none; cursor: auto; background-color: #fff; border-color: #dee2e6; }
     </style>
 </head>
 <body>

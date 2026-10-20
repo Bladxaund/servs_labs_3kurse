@@ -2,22 +2,17 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
-use App\Http\Controllers\AuthController; // <-- Добавлено для лабы 3
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
-// ==========================================
-// ЛАБОРАТОРНАЯ 2 (Главная, Галерея)
-// ==========================================
-Route::get('/', [ArticleController::class, 'index'])->name('home'); // <-- Вот он, пропавший маршрут!
-Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
 
+// CRUD для статей
+Route::resource('articles', ArticleController::class);
 
-// ==========================================
-// СТАРЫЕ СТРАНИЦЫ (О нас, Контакты)
-// ==========================================
-Route::get('/about', function () {
-    return view('about');
-})->name('about');
+// Главная страница (теперь тоже через ArticleController)
+Route::get('/', [ArticleController::class, 'index'])->name('home');
 
+// Остальные маршруты (о нас, контакты, галерея, авторизация)
+Route::get('/about', function () { return view('about'); })->name('about');
 Route::get('/contacts', function () {
     $contacts = [
         ['title' => 'Телефон',  'value' => '+7 (900) 123-45-67'],
@@ -27,10 +22,7 @@ Route::get('/contacts', function () {
     ];
     return view('contacts', ['contacts' => $contacts]);
 })->name('contacts');
+Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
 
-
-// ==========================================
-// ЛАБОРАТОРНАЯ 3 (Регистрация)
-// ==========================================
 Route::get('/signin', [AuthController::class, 'create'])->name('signin');
 Route::post('/signin', [AuthController::class, 'registration'])->name('registration.post');
