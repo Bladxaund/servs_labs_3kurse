@@ -5,13 +5,31 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
 
-// CRUD для статей
-Route::resource('articles', ArticleController::class);
+// --- ЛАБА 6: Авторизация и Регистрация ---
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-// Главная страница (теперь тоже через ArticleController)
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+});
+
+// Выход (только для авторизованных)
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+
+// --- СТАТЬИ (CRUD) ---
+// Главная страница (доступна всем)
 Route::get('/', [ArticleController::class, 'index'])->name('home');
 
-// Остальные маршруты (о нас, контакты, галерея, авторизация)
+// Просмотр одной статьи (доступен всем)
+Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+
+// Создание, Редактирование, Удаление (ТОЛЬКО ДЛЯ АВТОРИЗОВАННЫХ - п.4 задания)
+Route::resource('articles', ArticleController::class)->except(['index', 'show'])->middleware('auth:sanctum');
+
+
+// --- ОСТАЛЬНЫЕ СТРАНИЦЫ ---
 Route::get('/about', function () { return view('about'); })->name('about');
 Route::get('/contacts', function () {
     $contacts = [
@@ -23,6 +41,3 @@ Route::get('/contacts', function () {
     return view('contacts', ['contacts' => $contacts]);
 })->name('contacts');
 Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
-
-Route::get('/signin', [AuthController::class, 'create'])->name('signin');
-Route::post('/signin', [AuthController::class, 'registration'])->name('registration.post');

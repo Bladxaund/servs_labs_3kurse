@@ -49,7 +49,21 @@
     <a href="{{ route('about') }}">О нас</a>
     <a href="{{ route('contacts') }}">Контакты</a>
     <a href="{{ route('gallery') }}">Галерея</a>
-    <a href="{{ route('signin') }}">Регистрация</a> <!-- Новая ссылка -->
+
+    {{-- Если пользователь вошел в систему --}}
+    @auth
+        <span style="color: #a0aec0; margin-right: 20px; margin-left: 20px;">Привет, {{ auth()->user()->name }}!</span>
+        <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+            @csrf
+            <button type="submit" style="background: none; border: none; color: #fc8181; cursor: pointer; font-size: 16px;">Выйти</button>
+        </form>
+    @endauth
+
+    {{-- Если пользователь - гость --}}
+    @guest
+        <a href="{{ route('register') }}">Регистрация</a>
+        <a href="{{ route('login') }}">Вход</a>
+    @endguest
 </nav>
     </header>
 

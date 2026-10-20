@@ -2,37 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Метод для отображения страницы с формой (п. 8)
-    public function create()
+    // --- РЕГИСТРАЦИЯ ---
+    public function showRegister()
     {
-        return view('auth.signin');
+        return view('auth.register');
     }
 
-    // Метод для обработки формы, валидации и вывода JSON (п. 6, 9)
-    public function registration(Request $request)
+    public function register(Request $request)
     {
-        // Валидация входящих данных
-        $validatedData = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'password' => 'required|string|min:6',
-        ], [
-            'name.required' => 'Поле Имя обязательно для заполнения.',
-            'email.required' => 'Поле Email обязательно для заполнения.',
-            'email.email' => 'Введите корректный Email.',
-            'password.required' => 'Поле Пароль обязательно для заполнения.',
-            'password.min' => 'Пароль должен содержать минимум 6 символов.',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
-        // Возвращаем JSON-ответ с данными
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Данные успешно валидированы!',
-            'data' => $validatedData
-        ], 200, [], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        Auth::login($user);
+
+        return redirect()->route('home')->with('success', 'Вы успешно зарегистрировались!');
+    }
+
+    // --- ВХОД ---
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+            return redirect()->intended(route('home'))->with('success', 'Вы вошли в систему!');
+        }
+
+        return back()->withErrors([
+            'email' => 'Неверный email или пароль.',
+        ])->onlyInput('email');
+    }
+
+    // --- ВЫХОД ---
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home')->with('success', 'Вы вышли из системы.');
     }
 }
