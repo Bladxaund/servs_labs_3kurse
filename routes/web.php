@@ -3,11 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController; // <-- Добавлено для лабы 3
-
+use App\Http\Controllers\ArticleController;
 // ==========================================
 // ЛАБОРАТОРНАЯ 2 (Главная, Галерея)
 // ==========================================
-Route::get('/', [MainController::class, 'index'])->name('home'); // <-- Вот он, пропавший маршрут!
+Route::get('/', [ArticleController::class, 'index'])->name('home'); // <-- Вот он, пропавший маршрут!
 Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
 
 
