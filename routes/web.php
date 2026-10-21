@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CommentController;
 
 // --- ГЛАВНАЯ СТРАНИЦА ---
 Route::get('/', [ArticleController::class, 'index'])->name('home');
@@ -39,3 +40,8 @@ Route::get('/contacts', function () {
     return view('contacts', ['contacts' => $contacts]);
 })->name('contacts');
 Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
+
+Route::post('/articles/{article}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('auth');
+Route::get('/moderate', [CommentController::class, 'moderate'])->name('comments.moderate')->middleware('auth');
+Route::patch('/comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve')->middleware('auth');
+Route::delete('/comments/{comment}/reject', [CommentController::class, 'reject'])->name('comments.reject')->middleware('auth');

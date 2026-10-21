@@ -46,6 +46,11 @@
             <a href="{{ route('gallery') }}">Галерея</a>
 
             @auth
+                {{-- Ссылка на модерацию видна ТОЛЬКО модератору (Лаба 9) --}}
+                @if(auth()->user()->role && auth()->user()->role->name === 'moderator')
+                    <a href="{{ route('comments.moderate') }}" style="color: #fbbf24;">Модерация комментариев</a>
+                @endif
+
                 <span style="color: #a0aec0; margin-right: 20px; margin-left: 20px;">Привет, {{ auth()->user()->name }}!</span>
                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                     @csrf
