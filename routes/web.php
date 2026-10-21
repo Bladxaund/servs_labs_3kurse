@@ -16,6 +16,10 @@ Route::resource('articles', ArticleController::class)
 // --- 2. ГЛАВНАЯ И ПРОСМОТР ОДНОЙ СТАТЬИ ---
 Route::get('/', [ArticleController::class, 'index'])->name('home');
 Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+// Находим строку Route::get('/articles/{article}', ...) и добавляем middleware:
+Route::get('/articles/{article}', [ArticleController::class, 'show'])
+    ->name('articles.show')
+    ->middleware('track.views');
 
 // --- 3. АВТОРИЗАЦИЯ ---
 Route::middleware('guest')->group(function () {
