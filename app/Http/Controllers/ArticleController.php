@@ -32,6 +32,7 @@ class ArticleController extends Controller
         $validated['published_at'] = date('Y-m-d');
 
         Article::create($validated);
+
         return redirect()->route('home')->with('success', 'Статья успешно создана!');
     }
 
@@ -42,13 +43,13 @@ class ArticleController extends Controller
 
     public function edit(Article $article)
     {
-        $this->authorize('update', $article);
+        $this->authorize('update', $article); // Проверка прав
         return view('articles.edit', compact('article'));
     }
 
     public function update(Request $request, Article $article)
     {
-        $this->authorize('update', $article);
+        $this->authorize('update', $article); // Проверка прав
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -57,12 +58,14 @@ class ArticleController extends Controller
         ]);
 
         $article->update($validated);
+
         return redirect()->route('home')->with('success', 'Статья успешно обновлена!');
     }
 
     public function destroy(Article $article)
     {
-        $this->authorize('delete', $article);
+        $this->authorize('delete', $article); // Проверка прав
+        
         $article->delete();
         return redirect()->route('home')->with('success', 'Статья удалена!');
     }

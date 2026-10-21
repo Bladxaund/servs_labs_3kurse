@@ -6,6 +6,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1 style="margin: 0;">Новости</h1>
         
+        {{-- Показываем кнопку "Добавить" ТОЛЬКО модератору --}}
         @can('create', App\Models\Article::class)
             <a href="{{ route('articles.create') }}" style="background: #1abc9c; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">+ Добавить статью</a>
         @endcan
@@ -31,6 +32,7 @@
             <div style="margin-top: 15px;">
                 <a href="{{ route('articles.show', $article->id) }}" style="margin-right: 10px; color: #2d3748;">Читать</a>
                 
+                {{-- Кнопки управления только для модератора --}}
                 @can('update', $article)
                     <a href="{{ route('articles.edit', $article->id) }}" style="margin-right: 10px; color: #f59e0b;">Редактировать</a>
                 @endcan
