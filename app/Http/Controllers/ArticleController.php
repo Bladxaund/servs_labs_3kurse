@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
+use App\Mail\NewArticleNotification; // Для Лабы 8
+use Illuminate\Support\Facades\Mail; // Для Лабы 8
 
 class ArticleController extends Controller
 {
@@ -19,6 +21,7 @@ class ArticleController extends Controller
         return view('articles.create');
     }
 
+    // 5. Вызов метода send после сохранения в БД
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -31,8 +34,14 @@ class ArticleController extends Controller
         $validated['full_image'] = 'full.jpeg';
         $validated['published_at'] = date('Y-m-d');
 
-        Article::create($validated);
-        return redirect()->route('home')->with('success', 'Статья успешно создана!');
+        // Сохраняем статью
+        $article = Article::create($validated);
+
+        // Отправляем письмо
+        // Укажите почту, куда хотите получить письмо (или оставьте тестовую)
+        Mail::to('student_serv_labs@mail.ru')->send(new NewArticleNotification($article));
+
+        return redirect()->route('home')->with('success', 'Статья успешно создана, письмо отправлено!');
     }
 
     public function show(Article $article)
@@ -57,12 +66,14 @@ class ArticleController extends Controller
         ]);
 
         $article->update($validated);
+
         return redirect()->route('home')->with('success', 'Статья успешно обновлена!');
     }
 
     public function destroy(Article $article)
     {
         $this->authorize('delete', $article);
+        
         $article->delete();
         return redirect()->route('home')->with('success', 'Статья удалена!');
     }

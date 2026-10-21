@@ -5,7 +5,23 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
 
-// --- АВТОРИЗАЦИЯ (Лаба 6) ---
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// --- ГЛАВНАЯ СТРАНИЦА ---
+Route::get('/', [ArticleController::class, 'index'])->name('home');
+
+// --- СТАТЬИ (Просмотр доступен всем) ---
+Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+
+// --- СТАТЬИ (Создание, Редактирование, Удаление - только для модератора) ---
+Route::resource('articles', ArticleController::class)->except(['index', 'show']);
+    
+
+// --- АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ (Лаба 6) ---
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
@@ -14,19 +30,14 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
 
+// Выход из системы
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// --- CRUD СТАТЬИ (Лабы 5, 7) ---
-Route::get('/', [ArticleController::class, 'index'])->name('home');
-Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+// --- ОСТАЛЬНЫЕ СТАТИЧЕСКИЕ СТРАНИЦЫ ---
+Route::get('/about', function () { 
+    return view('about'); 
+})->name('about');
 
-// Только для модераторов (через политику)
-Route::resource('articles', ArticleController::class)
-    ->except(['index', 'show'])
-    ->middleware('can:create,App\Models\Article');
-
-// --- ОСТАЛЬНЫЕ СТРАНИЦЫ ---
-Route::get('/about', function () { return view('about'); })->name('about');
 Route::get('/contacts', function () {
     $contacts = [
         ['title' => 'Телефон',  'value' => '+7 (900) 123-45-67'],
@@ -36,4 +47,5 @@ Route::get('/contacts', function () {
     ];
     return view('contacts', ['contacts' => $contacts]);
 })->name('contacts');
+
 Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
