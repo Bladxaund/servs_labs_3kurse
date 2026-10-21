@@ -3,17 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
-use App\Models\User;
+use App\Models\User; // Для уведомлений
 use Illuminate\Http\Request;
-use App\Jobs\VeryLongJob; // Из 10-й лабы
-use App\Notifications\NewArticleNotification; // Из 12-й лабы
-use Illuminate\Support\Facades\Notification; // Из 12-й лабы
+use Illuminate\Support\Facades\Cache; // Для 13-й лабы (Кеш)
+use Illuminate\Support\Facades\Notification; // Для 12-й лабы (Уведомления)
+use App\Notifications\NewArticleNotification; // Для 12-й лабы
 
 class ArticleController extends Controller
 {
+    // 4. Кешируем данные главной страницы с учетом пагинации
     public function index()
     {
-        $articles = Article::orderBy('published_at', 'desc')->paginate(5);
+        $page = request('page', 1); // Получаем номер текущей страницы (по умолчанию 1)
+        $cacheKey = 'articles_page_' . $page;
+
+        // remember сохраняет данные в кеш на 3600 секунд (1 час)
+        $articles = Cache::remember($cacheKey, 3600, function () {
+            return Article::orderBy('published_at', 'desc')->paginate(5);
+        });
+
         return view('home', ['articles' => $articles]);
     }
 
@@ -38,22 +46,31 @@ class ArticleController extends Controller
         // 1. Сохраняем статью
         $article = Article::create($validated);
 
-        // 2. Ставим в очередь отправку письма (10-я лаба)
-        // VeryLongJob::dispatch($article); 
-
-        // 3. Отправляем уведомление в базу данных Читателям (12-я лаба)
+        // 2. Отправляем уведомления читателям (Лаба 12)
         $readers = User::whereHas('role', function ($query) {
             $query->where('name', 'reader');
         })->get();
-
         Notification::send($readers, new NewArticleNotification($article));
+
+        // 3. УДАЛЯЕМ КЕШ ГЛАВНОЙ СТРАНИЦЫ (Лаба 13, п. 5)
+        // Удаляем кеш первой страницы. Если нужно, можно очистить и другие.
+        Cache::forget('articles_page_1');
 
         return redirect()->route('home')->with('success', 'Статья успешно создана!');
     }
 
+    // 6. Кешируем данные страницы просмотра статьи, включая комментарии
     public function show(Article $article)
     {
-        return view('articles.show', compact('article'));
+        // rememberForever хранит кеш бессрочно
+        $cachedArticle = Cache::rememberForever('article_' . $article->id, function () use ($article) {
+            // Загружаем одобренные комментарии вместе с их авторами
+            return $article->load(['comments' => function($query) {
+                $query->where('is_approved', true)->with('user');
+            }]);
+        });
+
+        return view('articles.show', ['article' => $cachedArticle]);
     }
 
     public function edit(Article $article)
@@ -74,6 +91,9 @@ class ArticleController extends Controller
 
         $article->update($validated);
 
+        // 7. ОЧИЩАЕМ ВЕСЬ КЕШ (Лаба 13, п. 7)
+        Cache::flush();
+
         return redirect()->route('home')->with('success', 'Статья успешно обновлена!');
     }
 
@@ -82,6 +102,10 @@ class ArticleController extends Controller
         $this->authorize('delete', $article);
         
         $article->delete();
+
+        // 7. ОЧИЩАЕМ ВЕСЬ КЕШ (Лаба 13, п. 7)
+        Cache::flush();
+
         return redirect()->route('home')->with('success', 'Статья удалена!');
     }
 }
