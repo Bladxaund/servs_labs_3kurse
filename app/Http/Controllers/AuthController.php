@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // --- РЕГИСТРАЦИЯ ---
+    // 1. Показ формы регистрации
     public function showRegister()
     {
         return view('auth.register');
     }
 
+    // 1. Сохранение нового пользователя с валидацией
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -23,23 +24,23 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $user = User::create([
+        User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
 
-        Auth::login($user);
-
-        return redirect()->route('home')->with('success', 'Вы успешно зарегистрировались!');
+        // По заданию: redirect на форму авторизации
+        return redirect()->route('login')->with('success', 'Регистрация успешна! Теперь войдите.');
     }
 
-    // --- ВХОД ---
+    // 2. Показ формы входа
     public function showLogin()
     {
         return view('auth.login');
     }
 
+    // 2. Аутентификация с присвоением токена сессии
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -48,7 +49,7 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+            $request->session()->regenerate(); // Обновляем сессию (токен)
             return redirect()->intended(route('home'))->with('success', 'Вы вошли в систему!');
         }
 
@@ -57,7 +58,7 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // --- ВЫХОД ---
+    // 3. Выход с удалением токена, сессии и обновлением CSRF
     public function logout(Request $request)
     {
         Auth::logout();

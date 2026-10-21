@@ -3,9 +3,13 @@
 @section('title', 'Главная')
 
 @section('content')
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>Новости</h1>
-        <a href="{{ route('articles.create') }}" style="background: #1abc9c; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">+ Добавить статью</a>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="margin: 0;">Новости</h1>
+        
+        {{-- Показываем кнопку создания только авторизованным (Лаба 6) --}}
+        @auth
+            <a href="{{ route('articles.create') }}" style="background: #1abc9c; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">+ Добавить статью</a>
+        @endauth
     </div>
 
     @if (session('success'))
@@ -27,13 +31,17 @@
             
             <div style="margin-top: 15px;">
                 <a href="{{ route('articles.show', $article->id) }}" style="margin-right: 10px; color: #2d3748;">Читать</a>
-                <a href="{{ route('articles.edit', $article->id) }}" style="margin-right: 10px; color: #f59e0b;">Редактировать</a>
                 
-                <form action="{{ route('articles.destroy', $article->id) }}" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0;" onclick="return confirm('Вы уверены?')">Удалить</button>
-                </form>
+                {{-- Кнопки управления только для авторизованных (Лаба 6) --}}
+                @auth
+                    <a href="{{ route('articles.edit', $article->id) }}" style="margin-right: 10px; color: #f59e0b;">Редактировать</a>
+                    
+                    <form action="{{ route('articles.destroy', $article->id) }}" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 0;" onclick="return confirm('Вы уверены?')">Удалить</button>
+                    </form>
+                @endauth
             </div>
         </article>
     @endforeach
