@@ -30,11 +30,13 @@
         .contacts-list { list-style: none; padding: 0; }
         .contacts-list li { padding: 12px 15px; border-left: 4px solid #1abc9c; background: #f9fafb; margin-bottom: 10px; border-radius: 4px; }
 
-        /* Стили пагинации */
         .pagination { display: flex; padding-left: 0; list-style: none; border-radius: .25rem; margin-top: 20px; gap: 5px; }
         .page-link { position: relative; display: block; padding: .5rem .75rem; line-height: 1.25; color: #2d3748; background-color: #fff; border: 1px solid #dee2e6; text-decoration: none; border-radius: 4px; }
         .page-link:hover { z-index: 2; color: #1a202c; background-color: #e9ecef; }
         .page-item.active .page-link { z-index: 3; color: #fff; background-color: #2d3748; border-color: #2d3748; }
+
+        /* Стили для выпадающего меню уведомлений */
+        #notif-dropdown.show { display: block !important; }
     </style>
 </head>
 <body>
@@ -48,8 +50,30 @@
             @auth
                 {{-- Ссылка на модерацию видна ТОЛЬКО модератору (Лаба 9) --}}
                 @if(auth()->user()->role && auth()->user()->role->name === 'moderator')
-                    <a href="{{ route('comments.moderate') }}" style="color: #fbbf24;">Модерация комментариев</a>
+                    <a href="{{ route('comments.moderate') }}" style="color: #fbbf24;">Модерация</a>
                 @endif
+
+                {{-- Колокольчик с уведомлениями (Лаба 12) --}}
+                <div style="display: inline-block; position: relative; margin-right: 20px;">
+                    <span style="color: #fff; cursor: pointer;" onclick="document.getElementById('notif-dropdown').classList.toggle('show')">
+                        🔔 Уведомления 
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                            <span style="background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px;">
+                                {{ auth()->user()->unreadNotifications->count() }}
+                            </span>
+                        @endif
+                    </span>
+                    
+                    <div id="notif-dropdown" style="display: none; position: absolute; top: 100%; right: 0; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 6px; width: 300px; z-index: 1000; max-height: 400px; overflow-y: auto;">
+                        @forelse(auth()->user()->unreadNotifications as $notification)
+                            <a href="{{ route('notifications.read', $notification->id) }}" style="display: block; padding: 10px 15px; border-bottom: 1px solid #eee; color: #333; text-decoration: none; font-size: 14px;">
+                                {{ $notification->data['message'] }}
+                            </a>
+                        @empty
+                            <div style="padding: 15px; color: #888; text-align: center;">Нет новых уведомлений</div>
+                        @endforelse
+                    </div>
+                </div>
 
                 <span style="color: #a0aec0; margin-right: 20px; margin-left: 20px;">Привет, {{ auth()->user()->name }}!</span>
                 <form action="{{ route('logout') }}" method="POST" style="display: inline;">

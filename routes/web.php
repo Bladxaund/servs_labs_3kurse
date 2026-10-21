@@ -5,20 +5,19 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\NotificationController;
 
-// --- ГЛАВНАЯ СТРАНИЦА ---
-Route::get('/', [ArticleController::class, 'index'])->name('home');
-
-// ВАЖНО: Сначала ставим Resource (создание, редактирование и т.д.), 
-// чтобы слово "create" не воспринималось как ID статьи.
+// --- 1. СНАЧАЛА РЕСУРСНЫЙ МАРШРУТ (Создание, Редактирование, Удаление) ---
+// Он должен идти ПЕРВЫМ, чтобы Laravel не путал /create с ID статьи
 Route::resource('articles', ArticleController::class)
     ->except(['index', 'show'])
     ->middleware('can:create,App\Models\Article');
 
-// Просмотр одной статьи (обязательно должен идти ПОСЛЕ ресурсного)
+// --- 2. ГЛАВНАЯ И ПРОСМОТР ОДНОЙ СТАТЬИ ---
+Route::get('/', [ArticleController::class, 'index'])->name('home');
 Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
 
-// --- АВТОРИЗАЦИЯ ---
+// --- 3. АВТОРИЗАЦИЯ ---
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
@@ -28,7 +27,16 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// --- ОСТАЛЬНЫЕ СТРАНИЦЫ ---
+// --- 4. КОММЕНТАРИИ (9-я лаба) ---
+Route::post('/articles/{article}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('auth');
+Route::get('/moderate', [CommentController::class, 'moderate'])->name('comments.moderate')->middleware('auth');
+Route::patch('/comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve')->middleware('auth');
+Route::delete('/comments/{comment}/reject', [CommentController::class, 'reject'])->name('comments.reject')->middleware('auth');
+
+// --- 5. УВЕДОМЛЕНИЯ (12-я лаба) ---
+Route::get('/notifications/{id}', [NotificationController::class, 'read'])->name('notifications.read')->middleware('auth');
+
+// --- 6. ОСТАЛЬНЫЕ СТРАНИЦЫ ---
 Route::get('/about', function () { return view('about'); })->name('about');
 Route::get('/contacts', function () {
     $contacts = [
@@ -40,8 +48,3 @@ Route::get('/contacts', function () {
     return view('contacts', ['contacts' => $contacts]);
 })->name('contacts');
 Route::get('/gallery', [MainController::class, 'gallery'])->name('gallery');
-
-Route::post('/articles/{article}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('auth');
-Route::get('/moderate', [CommentController::class, 'moderate'])->name('comments.moderate')->middleware('auth');
-Route::patch('/comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve')->middleware('auth');
-Route::delete('/comments/{comment}/reject', [CommentController::class, 'reject'])->name('comments.reject')->middleware('auth');

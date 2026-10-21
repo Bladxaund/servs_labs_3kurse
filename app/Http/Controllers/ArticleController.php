@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Mail\NewArticleNotification; // Для Лабы 8
-use Illuminate\Support\Facades\Mail; // Для Лабы 8
-use App\Jobs\VeryLongJob;
+use App\Jobs\VeryLongJob; // Из 10-й лабы
+use App\Notifications\NewArticleNotification; // Из 12-й лабы
+use Illuminate\Support\Facades\Notification; // Из 12-й лабы
 
 class ArticleController extends Controller
 {
@@ -22,8 +23,7 @@ class ArticleController extends Controller
         return view('articles.create');
     }
 
-    // 5. Вызов метода send после сохранения в БД
-           public function store(Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -35,13 +35,20 @@ class ArticleController extends Controller
         $validated['full_image'] = 'full.jpeg';
         $validated['published_at'] = date('Y-m-d');
 
-        // Сохраняем статью
+        // 1. Сохраняем статью
         $article = Article::create($validated);
 
-        // ВМЕСТО Mail::to(...) ВЫЗЫВАЕМ ЗАДАНИЕ В ОЧЕРЕДЬ (dispatch)
-        VeryLongJob::dispatch($article);
+        // 2. Ставим в очередь отправку письма (10-я лаба)
+        // VeryLongJob::dispatch($article); 
 
-        return redirect()->route('home')->with('success', 'Статья создана, письмо отправлено в очередь!');
+        // 3. Отправляем уведомление в базу данных Читателям (12-я лаба)
+        $readers = User::whereHas('role', function ($query) {
+            $query->where('name', 'reader');
+        })->get();
+
+        Notification::send($readers, new NewArticleNotification($article));
+
+        return redirect()->route('home')->with('success', 'Статья успешно создана!');
     }
 
     public function show(Article $article)

@@ -3,18 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Role; // <-- Добавили импорт модели ролей
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // --- РЕГИСТРАЦИЯ ---
+    // Показ формы регистрации
     public function showRegister()
     {
         return view('auth.register');
     }
 
+    // Сохранение нового пользователя с валидацией
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -23,23 +25,27 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $user = User::create([
+        // Ищем роль "Читатель" в базе данных, чтобы присвоить её новому пользователю
+        $readerRole = Role::where('name', 'reader')->first();
+
+        User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'role_id' => $readerRole ? $readerRole->id : null, // <-- Присваиваем роль
         ]);
 
-        Auth::login($user);
-
-        return redirect()->route('home')->with('success', 'Вы успешно зарегистрировались!');
+        // По заданию 6-й лабы: redirect на форму авторизации
+        return redirect()->route('login')->with('success', 'Регистрация успешна! Теперь войдите.');
     }
 
-    // --- ВХОД ---
+    // Показ формы входа
     public function showLogin()
     {
         return view('auth.login');
     }
 
+    // Аутентификация с присвоением токена сессии
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -48,7 +54,7 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+            $request->session()->regenerate(); // Обновляем сессию (токен)
             return redirect()->intended(route('home'))->with('success', 'Вы вошли в систему!');
         }
 
@@ -57,7 +63,7 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // --- ВЫХОД ---
+    // Выход с удалением токена, сессии и обновлением CSRF
     public function logout(Request $request)
     {
         Auth::logout();
