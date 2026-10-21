@@ -15,13 +15,11 @@ class NewArticleNotification extends Mailable
 
     public $article;
 
-    // 3. Передаем объект статьи в конструктор
     public function __construct(Article $article)
     {
         $this->article = $article;
     }
 
-    // 3. Реализуем метод build (в новых версиях Laravel он называется envelope + content)
     public function envelope(): Envelope
     {
         return new Envelope(

@@ -22,7 +22,7 @@ class ArticleController extends Controller
     }
 
     // 5. Вызов метода send после сохранения в БД
-    public function store(Request $request)
+       public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -37,11 +37,10 @@ class ArticleController extends Controller
         // Сохраняем статью
         $article = Article::create($validated);
 
-        // Отправляем письмо
-        // Укажите почту, куда хотите получить письмо (или оставьте тестовую)
+        // ОТПРАВЛЯЕМ ПИСЬМО
         Mail::to('student_serv_labs@mail.ru')->send(new NewArticleNotification($article));
 
-        return redirect()->route('home')->with('success', 'Статья успешно создана, письмо отправлено!');
+        return redirect()->route('home')->with('success', 'Статья создана, письмо отправлено!');
     }
 
     public function show(Article $article)
