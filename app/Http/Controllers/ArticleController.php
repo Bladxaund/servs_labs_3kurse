@@ -6,6 +6,7 @@ use App\Models\Article;
 use Illuminate\Http\Request;
 use App\Mail\NewArticleNotification; // Для Лабы 8
 use Illuminate\Support\Facades\Mail; // Для Лабы 8
+use App\Jobs\VeryLongJob;
 
 class ArticleController extends Controller
 {
@@ -22,7 +23,7 @@ class ArticleController extends Controller
     }
 
     // 5. Вызов метода send после сохранения в БД
-       public function store(Request $request)
+           public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -37,10 +38,10 @@ class ArticleController extends Controller
         // Сохраняем статью
         $article = Article::create($validated);
 
-        // ОТПРАВЛЯЕМ ПИСЬМО
-        Mail::to('student_serv_labs@mail.ru')->send(new NewArticleNotification($article));
+        // ВМЕСТО Mail::to(...) ВЫЗЫВАЕМ ЗАДАНИЕ В ОЧЕРЕДЬ (dispatch)
+        VeryLongJob::dispatch($article);
 
-        return redirect()->route('home')->with('success', 'Статья создана, письмо отправлено!');
+        return redirect()->route('home')->with('success', 'Статья создана, письмо отправлено в очередь!');
     }
 
     public function show(Article $article)
