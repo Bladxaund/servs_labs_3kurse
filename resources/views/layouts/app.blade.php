@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Мой сайт')</title>
@@ -35,11 +36,12 @@
         .page-link:hover { z-index: 2; color: #1a202c; background-color: #e9ecef; }
         .page-item.active .page-link { z-index: 3; color: #fff; background-color: #2d3748; border-color: #2d3748; }
 
-        /* Стили для выпадающего меню уведомлений */
         #notif-dropdown.show { display: block !important; }
     </style>
 </head>
 <body>
+    <div id="app"></div>
+
     <header>
         <nav>
             <a href="{{ route('home') }}">Главная</a>
@@ -48,12 +50,10 @@
             <a href="{{ route('gallery') }}">Галерея</a>
 
             @auth
-                {{-- Ссылка на модерацию видна ТОЛЬКО модератору (Лаба 9) --}}
                 @if(auth()->user()->role && auth()->user()->role->name === 'moderator')
                     <a href="{{ route('comments.moderate') }}" style="color: #fbbf24;">Модерация</a>
                 @endif
 
-                {{-- Колокольчик с уведомлениями (Лаба 12) --}}
                 <div style="display: inline-block; position: relative; margin-right: 20px;">
                     <span style="color: #fff; cursor: pointer;" onclick="document.getElementById('notif-dropdown').classList.toggle('show')">
                         🔔 Уведомления 

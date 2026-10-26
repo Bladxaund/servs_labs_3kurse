@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache; // Для 13-й лабы (Кеш)
 use Illuminate\Support\Facades\Notification; // Для 12-й лабы (Уведомления)
 use App\Notifications\NewArticleNotification; // Для 12-й лабы
+use App\Events\NewArticleEvent;
 
 class ArticleController extends Controller
 {
@@ -31,7 +32,7 @@ class ArticleController extends Controller
         return view('articles.create');
     }
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -52,8 +53,10 @@ class ArticleController extends Controller
         })->get();
         Notification::send($readers, new NewArticleNotification($article));
 
-        // 3. УДАЛЯЕМ КЕШ ГЛАВНОЙ СТРАНИЦЫ (Лаба 13, п. 5)
-        // Удаляем кеш первой страницы. Если нужно, можно очистить и другие.
+        // 3. ОТПРАВЛЯЕМ СОБЫТИЕ В PUSHER (Лаба 11)
+        event(new NewArticleEvent($article));
+
+        // 4. УДАЛЯЕМ КЕШ ГЛАВНОЙ СТРАНИЦЫ (Лаба 13)
         Cache::forget('articles_page_1');
 
         return redirect()->route('home')->with('success', 'Статья успешно создана!');
