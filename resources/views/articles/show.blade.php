@@ -17,14 +17,15 @@
 
         <h3 style="color: #2d3748; margin-bottom: 20px;">Комментарии</h3>
 
+        {{-- Сообщение об успехе --}}
         @if (session('success'))
             <div style="background: #d1fae5; color: #065f46; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #10b981;">
                 {{ session('success') }}
             </div>
         @endif
 
-        {{-- Вывод комментариев из переменной $article (кешируется в контроллере) --}}
-        @forelse ($article->comments as $comment)
+        {{-- Вывод одобренных комментариев --}}
+        @forelse ($article->comments->where('is_approved', true) as $comment)
             <div style="background: #f8fafc; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e2e8f0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div>
@@ -32,18 +33,20 @@
                         <span style="color: #a0aec0; font-size: 12px; margin-left: 10px;">{{ $comment->created_at->format('d.m.Y H:i') }}</span>
                     </div>
                     
-                    {{-- Кнопки управления (только для авторизованных) --}}
-                    @auth
-                        <div>
+                    {{-- Кнопки управления (видны только автору или модератору - ДЗ 4) --}}
+                    <div>
+                        @can('update', $comment)
                             <a href="{{ route('comments.edit', $comment->id) }}" style="color: #f59e0b; text-decoration: none; margin-right: 15px; font-size: 14px;">Редактировать</a>
-                            
+                        @endcan
+
+                        @can('delete', $comment)
                             <form action="{{ route('comments.destroy', $comment->id) }}" method="POST" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; padding: 0;" onclick="return confirm('Вы уверены, что хотите удалить комментарий?')">Удалить</button>
                             </form>
-                        </div>
-                    @endauth
+                        @endcan
+                    </div>
                 </div>
                 <p style="margin: 0; color: #4a5568; line-height: 1.5;">{{ $comment->body }}</p>
             </div>

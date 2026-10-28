@@ -28,14 +28,27 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// --- 3. КОММЕНТАРИИ ---
-Route::post('/articles/{article}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('auth');
+// --- 3. КОММЕНТАРИИ (ДЗ 4) ---
+Route::post('/articles/{article}/comments', [CommentController::class, 'store'])
+    ->name('comments.store')
+    ->middleware('can:create-comment');
+
+Route::get('/comments/{comment}/edit', [CommentController::class, 'edit'])
+    ->name('comments.edit')
+    ->middleware('can:update,comment');
+
+Route::put('/comments/{comment}', [CommentController::class, 'update'])
+    ->name('comments.update')
+    ->middleware('can:update,comment');
+
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
+    ->name('comments.destroy')
+    ->middleware('can:delete,comment');
+
+// Модерация (9-я лаба)
 Route::get('/moderate', [CommentController::class, 'moderate'])->name('comments.moderate')->middleware('auth');
 Route::patch('/comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve')->middleware('auth');
 Route::delete('/comments/{comment}/reject', [CommentController::class, 'reject'])->name('comments.reject')->middleware('auth');
-
-// CRUD для комментариев (ДЗ 3)
-Route::resource('comments', CommentController::class)->only(['edit', 'update', 'destroy'])->middleware('auth');
 
 // --- 4. УВЕДОМЛЕНИЯ ---
 Route::get('/notifications/{id}', [NotificationController::class, 'read'])->name('notifications.read')->middleware('auth');
