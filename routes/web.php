@@ -7,21 +7,18 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NotificationController;
 
-// --- 1. СНАЧАЛА РЕСУРСНЫЙ МАРШРУТ (Создание, Редактирование, Удаление) ---
-// Он должен идти ПЕРВЫМ, чтобы Laravel не путал /create с ID статьи
+// --- 1. СТАТЬИ ---
 Route::resource('articles', ArticleController::class)
     ->except(['index', 'show'])
     ->middleware('can:create,App\Models\Article');
 
-// --- 2. ГЛАВНАЯ И ПРОСМОТР ОДНОЙ СТАТЬИ ---
 Route::get('/', [ArticleController::class, 'index'])->name('home');
-Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
-// Находим строку Route::get('/articles/{article}', ...) и добавляем middleware:
+
 Route::get('/articles/{article}', [ArticleController::class, 'show'])
     ->name('articles.show')
     ->middleware('track.views');
 
-// --- 3. АВТОРИЗАЦИЯ ---
+// --- 2. АВТОРИЗАЦИЯ ---
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
@@ -31,16 +28,19 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// --- 4. КОММЕНТАРИИ (9-я лаба) ---
+// --- 3. КОММЕНТАРИИ ---
 Route::post('/articles/{article}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('auth');
 Route::get('/moderate', [CommentController::class, 'moderate'])->name('comments.moderate')->middleware('auth');
 Route::patch('/comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve')->middleware('auth');
 Route::delete('/comments/{comment}/reject', [CommentController::class, 'reject'])->name('comments.reject')->middleware('auth');
 
-// --- 5. УВЕДОМЛЕНИЯ (12-я лаба) ---
+// CRUD для комментариев (ДЗ 3)
+Route::resource('comments', CommentController::class)->only(['edit', 'update', 'destroy'])->middleware('auth');
+
+// --- 4. УВЕДОМЛЕНИЯ ---
 Route::get('/notifications/{id}', [NotificationController::class, 'read'])->name('notifications.read')->middleware('auth');
 
-// --- 6. ОСТАЛЬНЫЕ СТРАНИЦЫ ---
+// --- 5. ОСТАЛЬНЫЕ СТРАНИЦЫ ---
 Route::get('/about', function () { return view('about'); })->name('about');
 Route::get('/contacts', function () {
     $contacts = [

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    use HasFactory;
+    use HasFactory; // <-- ЭТА СТРОКА ДОЛЖНА БЫТЬ ЗДЕСЬ, ВНУТРИ КЛАССА (один раз)
 
     protected $fillable = ['article_id', 'user_id', 'body', 'is_approved'];
 

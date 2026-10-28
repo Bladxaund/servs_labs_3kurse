@@ -17,19 +17,33 @@
 
         <h3 style="color: #2d3748; margin-bottom: 20px;">Комментарии</h3>
 
-        {{-- Сообщение об отправке на модерацию --}}
         @if (session('success'))
             <div style="background: #d1fae5; color: #065f46; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #10b981;">
                 {{ session('success') }}
             </div>
         @endif
 
-        {{-- Вывод одобренных комментариев --}}
-        @forelse ($article->comments()->where('is_approved', true)->get() as $comment)
+        {{-- Вывод комментариев из переменной $article (кешируется в контроллере) --}}
+        @forelse ($article->comments as $comment)
             <div style="background: #f8fafc; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e2e8f0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <strong style="color: #2d3748;">{{ $comment->user->name }}</strong> 
-                    <span style="color: #a0aec0; font-size: 12px;">{{ $comment->created_at->format('d.m.Y H:i') }}</span>
+                    <div>
+                        <strong style="color: #2d3748;">{{ $comment->user->name }}</strong> 
+                        <span style="color: #a0aec0; font-size: 12px; margin-left: 10px;">{{ $comment->created_at->format('d.m.Y H:i') }}</span>
+                    </div>
+                    
+                    {{-- Кнопки управления (только для авторизованных) --}}
+                    @auth
+                        <div>
+                            <a href="{{ route('comments.edit', $comment->id) }}" style="color: #f59e0b; text-decoration: none; margin-right: 15px; font-size: 14px;">Редактировать</a>
+                            
+                            <form action="{{ route('comments.destroy', $comment->id) }}" method="POST" style="display: inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; padding: 0;" onclick="return confirm('Вы уверены, что хотите удалить комментарий?')">Удалить</button>
+                            </form>
+                        </div>
+                    @endauth
                 </div>
                 <p style="margin: 0; color: #4a5568; line-height: 1.5;">{{ $comment->body }}</p>
             </div>
@@ -47,11 +61,11 @@
                     @csrf
                     <div style="margin-bottom: 15px;">
                         <textarea name="body" rows="4" required placeholder="Напишите ваш комментарий здесь..." 
-                                  style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; resize: vertical; focus: outline: none;"
+                                  style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 15px; resize: vertical;"
                                   onfocus="this.style.borderColor='#3182ce'; this.style.boxShadow='0 0 0 3px rgba(49,130,206,0.1)'"
                                   onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'"></textarea>
                     </div>
-                    <button type="submit" style="background: #2d3748; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold; transition: background 0.2s;" onmouseover="this.style.background='#1a202c'" onmouseout="this.style.background='#2d3748'">
+                    <button type="submit" style="background: #2d3748; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold;" onmouseover="this.style.background='#1a202c'" onmouseout="this.style.background='#2d3748'">
                         Отправить
                     </button>
                 </form>
